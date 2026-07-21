@@ -39,11 +39,11 @@ demo = gr.ChatInterface(
         "payroll, and more. Answers are grounded in the company knowledge base."
     ),
     examples=EXAMPLES,
-    theme="soft",
 )
 
 
 if __name__ == "__main__":
+    # theme belongs on launch() (ChatInterface.__init__ doesn't accept it).
     # ssr_mode=False: the SSR Node proxy is flaky on Hugging Face Spaces and can
     # tear the whole app down right after startup ("Stopping Node.js server...").
-    demo.launch(ssr_mode=False)
+    demo.launch(theme="soft", ssr_mode=False)
