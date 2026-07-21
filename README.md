@@ -1,13 +1,4 @@
----
-title: HR Support Assistant
-emoji: 🧑‍💼
-colorFrom: indigo
-colorTo: blue
-sdk: gradio
-sdk_version: 6.20.0
-app_file: app.py
-pinned: false
----
+
 
 # HR Support Assistant — Multi-Agent RAG (LangChain + LangGraph + Gemini)
 
@@ -27,7 +18,7 @@ Hugging Face Spaces).
           └─────────────┘                    │  └──────────────┘
                                              ▼
                                       ┌──────────────┐
-                                      │  no_context  │ ─▶ "not in the KB"
+                                      │  no_context  │ ─▶ "not in the Knowledge base"
                                       └──────────────┘
 ```
 
@@ -46,7 +37,7 @@ hr_agent/
 ├── app.py                     # Gradio front end (entry point)
 ├── config.py                  # loads GOOGLE_API_KEY, defines the Gemini models
 ├── requirements.txt
-├── .env                       # GOOGLE_API_KEY=your_gemini_key  (do NOT commit)
+├── .env                       # GOOGLE_API_KEY=your_gemini_key  (NOT commit)
 ├── documents/
 │   └── knowledge_base.txt     # the HR policy knowledge base
 └── services/
@@ -154,6 +145,61 @@ scale well once the knowledge base gets large. For a bigger corpus, swap
 `InMemoryVectorStore` for a real persistent vector database — e.g. Chroma,
 FAISS with disk storage, Pinecone, or Weaviate — so embeddings are computed
 once and survive restarts/deployments instead of being rebuilt every time.)*
+
+## Swapping the model provider (e.g. OpenAI instead of Gemini)
+
+Because the rest of the codebase only ever calls the `get_llm()` and
+`get_embeddings()` factories — it never imports a provider class or hard-codes a
+model name — switching providers is a **`config.py`-only** change. Nothing in
+`services/` or `app.py` needs to be touched.
+
+To use OpenAI instead of Google Gemini:
+
+1. Install the OpenAI integration:
+
+   ```bash
+   pip install langchain-openai       # add it to requirements.txt too
+   ```
+
+2. Set `OPENAI_API_KEY` (in `.env` locally, or as a Secret when deployed)
+   instead of `GOOGLE_API_KEY`.
+
+3. Point the factories at the OpenAI classes in `config.py`:
+
+   ```python
+   import os
+   from dotenv import load_dotenv
+   from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+
+   load_dotenv()
+
+   OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+   if not OPENAI_API_KEY:
+       raise ValueError("OPENAI_API_KEY is not set (see .env / Secrets).")
+
+   # --- Model names ---
+   CHAT_MODEL = "gpt-4o-mini"                 # any OpenAI chat model
+   EMBEDDING_MODEL = "text-embedding-3-small" # any OpenAI embedding model
+
+   # Retrieval settings (unchanged)
+   TOP_K = 4
+   MIN_SIMILARITY = 0.65
+
+   def get_llm(temperature: float = 0.2) -> ChatOpenAI:
+       """Return the chat model used by the Report Generator."""
+       return ChatOpenAI(model=CHAT_MODEL, temperature=temperature)
+
+   def get_embeddings() -> OpenAIEmbeddings:
+       """Return the embedding model used to index and search the KB."""
+       return OpenAIEmbeddings(model=EMBEDDING_MODEL)
+   ```
+
+The same pattern applies to any LangChain-supported provider (Anthropic via
+`langchain-anthropic`, Ollama, Azure OpenAI, etc.) — swap the imports and the
+two factory bodies, keep the interface identical.
+
+> Note: `MIN_SIMILARITY` may need retuning after a provider swap — different
+> embedding models produce different similarity scales.
 
 ## Tuning note
 
