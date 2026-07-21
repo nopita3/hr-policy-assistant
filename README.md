@@ -1,3 +1,14 @@
+---
+title: HR Support Assistant
+emoji: 🧑‍💼
+colorFrom: indigo
+colorTo: blue
+sdk: gradio
+sdk_version: 6.20.0
+app_file: app.py
+pinned: false
+---
+
 # HR Support Assistant — Multi-Agent RAG (LangChain + LangGraph + Gemini)
 
 A two-agent Retrieval-Augmented Generation system that answers employee
@@ -44,10 +55,19 @@ hr_agent/
     └── graph.py               # nodes + graph orchestration
 ```
 
-## Models
+## Configuration
 
-- Generation: `gemini-2.5-flash` (stable, free tier)
-- Embeddings: `gemini-embedding-001` (GA, multilingual)
+All model names and retrieval knobs live in `config.py` — the rest of the code
+never hard-codes them. Use the `get_llm()` and `get_embeddings()` factories
+rather than instantiating models directly.
+
+| Setting          | Default                  | Purpose                                                                 |
+| ---------------- | ------------------------ | ----------------------------------------------------------------------- |
+| `GOOGLE_API_KEY` | *(required, from env)*   | Gemini API key. Read from `.env` locally or env/Secrets when deployed. Missing → `ValueError` at import. |
+| `CHAT_MODEL`     | `gemini-3.1-flash-lite`  | Generation model used by the Report Generator.                          |
+| `EMBEDDING_MODEL`| `gemini-embedding-001`   | Embedding model for indexing and search (GA, multilingual).             |
+| `TOP_K`          | `4`                      | How many knowledge-base chunks to retrieve per query.                   |
+| `MIN_SIMILARITY` | `0.65`                   | Cosine-similarity floor; below this a query routes to the fallback node (see Tuning note). |
 
 ## Run locally
 
