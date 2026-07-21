@@ -117,6 +117,24 @@ Get a free API key at Google AI Studio (aistudio.google.com) → "Get API key".
 
 ![Out-of-scope fallback](screenshots/query_3_out_of_scope_fallback.png)
 
+### CLI runs (`python main.py`) — LangGraph node trace
+
+The CLI entry point prints each node's decision (`retrieve` → `generate` /
+`no_context`), which makes the graph's routing and the retrieved context
+visible per query.
+
+**`retrieve` → `generate`, with the retrieved chunks and cited answer:**
+
+![CLI: international travel query](screenshots/main1.png)
+
+**Out-of-scope question routed to `no_context` (`has_context: False`):**
+
+![CLI: out-of-scope fallback](screenshots/main2.png)
+
+**Natural-language sick-leave request grounded in `[Sick (Medical) Leave]`:**
+
+![CLI: sick leave query](screenshots/main3.png)
+
 ## Performance note: cached embeddings
 
 The knowledge base is embedded into the in-memory vector store **once per
