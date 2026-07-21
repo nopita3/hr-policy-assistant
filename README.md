@@ -18,7 +18,7 @@ Hugging Face Spaces).
           └─────────────┘                    │  └──────────────┘
                                              ▼
                                       ┌──────────────┐
-                                      │  no_context  │ ─▶ "not in the Knowledge base"
+                                      │  no_context  │ ─▶ "not in Knowledge base"
                                       └──────────────┘
 ```
 
