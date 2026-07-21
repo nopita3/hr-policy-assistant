@@ -38,6 +38,3 @@ htmlcov/
 .gradio/
 flagged/
 CLAUDE.md
-
-# Screenshots (binary files rejected by HF Hub without xet)
-screenshots/
